@@ -9,7 +9,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.cross_validation import cross_val_score
 
 tknzr = TweetTokenizer()
-cnt = CountVectorizer(tokenizer=tknzr.tokenize)
+cnt = CountVectorizer(tokenizer=nltk.word_tokenize)
 chunker = pickle.load(open("models/chunker.pkl"))
 
 sentences = []
@@ -32,6 +32,7 @@ def xval(n_folds=10):
 def getIntention(a_string):
     X = cnt.transform([a_string])
     pred = clf.predict(X)
+    print pred
     return intentions[pred[0]]
 def getChunks(a_string):
     tokens = nltk.pos_tag(nltk.word_tokenize(a_string))

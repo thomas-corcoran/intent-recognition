@@ -78,12 +78,15 @@ def createIntentionModel(intention_glob_path='data/intents/*.txt'):
     X = cnt.fit_transform(sentences)
     clf = LogisticRegression()
     clf.fit(X,y)
-    return clf, intentions
-def writeIntentionModel(clf,intentions_dict,clf_fn='models/intention.pkl',intentions_fn='models/intentions.json'):
+    return clf, intentions,cnt
+def writeIntentionModel(clf,intentions_dict,cnt,clf_fn='models/intention.pkl',intentions_fn='models/intentions.json',
+                        vector_fn='models/cnt.pkl'):
 	with open(clf_fn,'w') as fo:
 		pickle.dump(clf,fo)
 	with open(intentions_fn,'w') as fo:
 		json.dump(intentions_dict,fo)
+	with open(vector_fn,'w') as fo:
+		pickle.dump(cnt,fo)
 def createChunker():
     chunks = ChunkedCorpusReader('data/chunks/','text_search.pos')
     tagger_classes = [UnigramTagger, BigramTagger]
@@ -93,4 +96,23 @@ def createChunker():
 def writeChunkerModel(chunker,fn='models/chunker.pkl'):
     with open(fn,'w') as fo:
         pickle.dump(chunker,fo)
-
+def createTSVFile(raw_in='data/ner/ner.txt',progress='data/ner/ner_train_progress.json',tsv_out='data/ner/ner.tsv'):
+    """Create TSV file for annotating NEs
+    then run 
+    java -cp ../stanford/stanford-ner-2015-12-09/stanford-ner.jar:../stanford/stanford-ner-2015-12-09/lib/* edu.stanford.nlp.ie.crf.CRFClassifier -prop config/ner.prop
+    to create NER model
+    """
+    with open(progress) as fi:
+        trained_to_line = json.load(fi)['trained_to_line']
+    sents = []
+    with open(raw_in) as fi:
+        for i,line in enumerate(fi):
+            if i >= trained_to_line:
+                sents.append(line)
+    with open(progress,'w') as fo:
+        trained_to_line = json.dump({'trained_to_line':i+1},fo)
+    with open(tsv_out,'a') as fo:
+        fo.write('\n')
+        for line in sents:
+            toks = nltk.word_tokenize(line)
+            fo.write('\tO\n'.join(toks)+'\tO\n\n')
