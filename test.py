@@ -10,7 +10,7 @@ from sklearn.cross_validation import cross_val_score
 
 tknzr = TweetTokenizer()
 cnt = CountVectorizer(tokenizer=tknzr.tokenize)
-chunker = pickle.load(open("/home/chase/nltk_data/chunkers/chunks_ub.pickle"))
+chunker = pickle.load(open("models/chunker.pkl"))
 
 sentences = []
 intention_files = glob.glob('data/intents/*.txt')
